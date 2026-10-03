@@ -1,3 +1,5 @@
+<img src="assets/icon.svg" width="80" alt="port-pool icon">
+
 # port-pool
 
 Simple port allocation tool for testing multiple dev environments in parallel. Useful for:
