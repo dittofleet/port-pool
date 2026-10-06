@@ -79,7 +79,7 @@ Wire `port-pool ensure .` directly into the project's dev script so a fresh clon
 }
 ```
 
-On the first `npm run dev` after cloning, ports are auto-provisioned and the configured env files are created. Subsequent runs are silent fast no-ops. If an env file has been hand-edited away from the templated values, `ensure` repairs it before the dev server starts. If the project holds a port that browsers block (allocated by an older port-pool), `ensure` replaces its ports with a new block.
+On the first `npm run dev` after cloning, ports are auto-provisioned and the configured env files are created. Subsequent runs are silent fast no-ops. If an env file has been hand-edited away from the templated values, `ensure` repairs it before the dev server starts. If the project holds a port that port-pool no longer hands out (see [Configuration](#configuration)), `ensure` replaces its ports with a new block.
 
 For CI or pre-commit checks, use `--check` to fail without modifying anything:
 
@@ -87,7 +87,7 @@ For CI or pre-commit checks, use `--check` to fail without modifying anything:
 port-pool ensure --check .
 ```
 
-`--check` exits with status 1 if the project is not provisioned, holds a port that browsers block, or has an env file that drifted. Otherwise it's silent.
+`--check` exits with status 1 if the project is not provisioned, holds a port that port-pool no longer hands out, or has an env file that drifted. Otherwise it's silent.
 
 Multiple parallel `ensure` calls (e.g. across worktrees starting their dev servers simultaneously) are safe; allocations serialize via a sidecar lock at `~/.local/share/port-pool/state.json.lock`.
 
@@ -119,7 +119,7 @@ Defines the machine-level port pool:
 - `portRangeStart`/`portRangeEnd`: inclusive bounds of the pool.
 - `excludedPorts`: ports inside the range that should never be allocated (typically defaults of common dev tools — Postgres, Redis, Vite, Django, Jupyter, etc.).
 
-Ports that browsers refuse to load (the Fetch standard's [bad ports](https://fetch.spec.whatwg.org/#port-blocking), such as 6000 and 6566) are never allocated either, so they don't need to be listed. Existing allocations that hold one are replaced by `ensure`.
+Whatever the range, port-pool never hands out ports below 1024 or above 65535, or ports that browsers refuse to load (the Fetch standard's [bad ports](https://fetch.spec.whatwg.org/#port-blocking), such as 6000 and 6566). None of these need to be listed. Existing allocations that hold one are replaced by `ensure`.
 
 Respects `$XDG_CONFIG_HOME` if set.
 

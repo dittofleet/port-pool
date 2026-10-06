@@ -61,14 +61,14 @@ func Ensure(args []string) error {
 		return ErrCheckFailed
 	}
 
-	// Allocations from before port-pool skipped browser-blocked ports are
-	// replaced, since a dev server on one of them can't be opened.
-	if existing == nil || existing.HasBrowserBlockedPort() {
+	// Allocations holding a port port-pool no longer hands out (such as one
+	// browsers block, which a dev server can't be opened on) are replaced.
+	if existing == nil || existing.HasUnusablePort() {
 		if check {
 			if existing == nil {
 				fmt.Fprintf(os.Stderr, "not provisioned: %s\n", resolvedDir)
 			} else {
-				fmt.Fprintf(os.Stderr, "browser-blocked port: %s: %s\n", resolvedDir, existing.PortString())
+				fmt.Fprintf(os.Stderr, "unusable port: %s: %s\n", resolvedDir, existing.PortString())
 			}
 			return ErrCheckFailed
 		}
@@ -78,10 +78,10 @@ func Ensure(args []string) error {
 		}
 		return state.WithState(func(s *state.State) error {
 			if existing, idx := s.FindByDir(resolvedDir); existing != nil {
-				if !existing.HasBrowserBlockedPort() {
+				if !existing.HasUnusablePort() {
 					return nil
 				}
-				fmt.Printf("Replacing ports browsers block for %s: %s\n", resolvedDir, existing.PortString())
+				fmt.Printf("Replacing unusable ports for %s: %s\n", resolvedDir, existing.PortString())
 				s.Allocations = append(s.Allocations[:idx], s.Allocations[idx+1:]...)
 			}
 			ports, err := PerformProvision(cfg, pcfg, s, resolvedDir)
