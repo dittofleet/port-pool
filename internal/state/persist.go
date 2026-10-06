@@ -10,15 +10,16 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/gofrs/flock"
+	"github.com/dittofleet/go-cli-kit/xdg"
+	"github.com/dittofleet/port-pool/internal/app"
 	"github.com/dittofleet/port-pool/internal/config"
-	"github.com/dittofleet/port-pool/internal/xdg"
+	"github.com/gofrs/flock"
 )
 
 const lockTimeout = 10 * time.Second
 
 func statePath() string {
-	return filepath.Join(xdg.DataDir("port-pool"), "state.json")
+	return filepath.Join(xdg.DataDir(app.Name), "state.json")
 }
 
 func emptyState() *State {

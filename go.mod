@@ -1,8 +1,9 @@
 module github.com/dittofleet/port-pool
 
-go 1.26.3
+go 1.26.5
 
 require (
+	github.com/dittofleet/go-cli-kit v0.1.0
 	github.com/gofrs/flock v0.13.0
 	golang.org/x/term v0.43.0
 )
