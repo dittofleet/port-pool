@@ -1,6 +1,7 @@
 package state
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/dittofleet/port-pool/internal/config"
@@ -29,22 +30,19 @@ func TestFindNextAvailablePortsSkipsBrowserBlockedPorts(t *testing.T) {
 
 func TestFindNextAvailablePortsStaysWithin1024To65535(t *testing.T) {
 	cases := []struct {
-		start, end, want int
+		start, end int
+		want       []int
 	}{
-		{1, 1024, 1024},
-		{65535, 70000, 65535},
+		{1, 1024, []int{1024}},
+		{65535, 70000, []int{65535}},
+		{1, 1023, nil},
 	}
 	for _, c := range cases {
 		cfg := &config.PoolConfig{PortRangeStart: c.start, PortRangeEnd: c.end}
 		ports := FindNextAvailablePorts(&State{}, cfg, 1)
-		if len(ports) != 1 || ports[0] != c.want {
-			t.Errorf("range %d-%d: got %v, want [%d]", c.start, c.end, ports, c.want)
+		if !slices.Equal(ports, c.want) {
+			t.Errorf("range %d-%d: got %v, want %v", c.start, c.end, ports, c.want)
 		}
-	}
-
-	cfg := &config.PoolConfig{PortRangeStart: 1, PortRangeEnd: 1023}
-	if ports := FindNextAvailablePorts(&State{}, cfg, 1); ports != nil {
-		t.Errorf("range 1-1023: got %v, want nil", ports)
 	}
 }
 

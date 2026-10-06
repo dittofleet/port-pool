@@ -9,9 +9,8 @@ import (
 
 func writePoolConfig(t *testing.T, contents string) {
 	t.Helper()
-	dir := t.TempDir()
-	t.Setenv("XDG_CONFIG_HOME", dir)
-	path := filepath.Join(dir, "port-pool", "config.json")
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	path := PoolConfigPath()
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		t.Fatal(err)
 	}

@@ -15,7 +15,7 @@ import (
 const PoolSchemaVersion = 1
 
 // The pool range used when the config leaves portRangeStart or
-// portRangeEnd out.
+// portRangeEnd out. StarterPoolConfig spells out the same range.
 const (
 	DefaultPortRangeStart = 3000
 	DefaultPortRangeEnd   = 9999
