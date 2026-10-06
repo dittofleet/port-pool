@@ -14,6 +14,13 @@ import (
 
 const PoolSchemaVersion = 1
 
+// The pool range used when the config leaves portRangeStart or
+// portRangeEnd out.
+const (
+	DefaultPortRangeStart = 3000
+	DefaultPortRangeEnd   = 9999
+)
+
 type PoolConfig struct {
 	SchemaVersion  int   `json:"schemaVersion"`
 	PortRangeStart int   `json:"portRangeStart"`
@@ -69,7 +76,10 @@ func LoadPool() (*PoolConfig, error) {
 		return nil, err
 	}
 
-	var cfg PoolConfig
+	cfg := PoolConfig{
+		PortRangeStart: DefaultPortRangeStart,
+		PortRangeEnd:   DefaultPortRangeEnd,
+	}
 	if err := json.Unmarshal(data, &cfg); err != nil {
 		return nil, fmt.Errorf("invalid %s: %w", path, err)
 	}
@@ -87,7 +97,10 @@ func (c *PoolConfig) validate(path string) error {
 		return fmt.Errorf("invalid %s:\n  - portRangeEnd: must be a positive integer", path)
 	}
 	if c.PortRangeEnd < c.PortRangeStart {
-		return fmt.Errorf("invalid %s:\n  - <root>: portRangeEnd must be >= portRangeStart", path)
+		return fmt.Errorf(
+			"invalid %s:\n  - <root>: portRangeEnd (%d) must be >= portRangeStart (%d)",
+			path, c.PortRangeEnd, c.PortRangeStart,
+		)
 	}
 	for i, p := range c.ExcludedPorts {
 		if p <= 0 {

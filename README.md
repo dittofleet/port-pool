@@ -116,7 +116,7 @@ Defines the machine-level port pool:
 ```
 
 - `schemaVersion`: required integer. Identifies the file's schema. The current schema is `1`. If a future port-pool release changes the schema, this number bumps and the binary errors clearly when it sees an old (or unknown) version.
-- `portRangeStart`/`portRangeEnd`: inclusive bounds of the pool.
+- `portRangeStart`/`portRangeEnd`: inclusive bounds of the pool. Optional. A missing bound defaults to 3000 (start) or 9999 (end).
 - `excludedPorts`: ports inside the range that should never be allocated (typically defaults of common dev tools — Postgres, Redis, Vite, Django, Jupyter, etc.).
 
 Whatever the range, port-pool never hands out ports below 1024 or above 65535, or ports that browsers refuse to load (the Fetch standard's [bad ports](https://fetch.spec.whatwg.org/#port-blocking), such as 6000 and 6566). None of these need to be listed. Existing allocations that hold one are replaced by `ensure`.
