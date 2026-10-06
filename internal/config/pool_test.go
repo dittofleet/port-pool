@@ -43,8 +43,10 @@ func TestLoadPoolDefaultsPortRange(t *testing.T) {
 
 func TestLoadPoolRejectsInvalidPortRange(t *testing.T) {
 	cases := map[string]string{
-		`{"schemaVersion": 1, "portRangeStart": 0}`:     "portRangeStart: must be a positive integer",
-		`{"schemaVersion": 1, "portRangeStart": 10000}`: "portRangeEnd (9999) must be >= portRangeStart (10000)",
+		`{"schemaVersion": 1, "portRangeStart": 0}`:                            "portRangeStart: must be a positive integer",
+		`{"schemaVersion": 1, "portRangeStart": 10000}`:                        "portRangeEnd (9999) must be >= portRangeStart (10000)",
+		`{"schemaVersion": 1, "portRangeStart": 1, "portRangeEnd": 1023}`:      "range 1-1023 has no usable ports",
+		`{"schemaVersion": 1, "portRangeStart": 70000, "portRangeEnd": 80000}`: "range 70000-80000 has no usable ports",
 	}
 	for config, want := range cases {
 		writePoolConfig(t, config)

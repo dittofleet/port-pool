@@ -37,8 +37,6 @@ if [ ! -f "$CONFIG_FILE" ]; then
   cat > "$CONFIG_FILE" <<'EOF'
 {
   "schemaVersion": 1,
-  "portRangeStart": 3000,
-  "portRangeEnd": 9999,
   "excludedPorts": [
     3000, 3001, 3306,
     4000, 4200,

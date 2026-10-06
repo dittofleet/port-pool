@@ -31,8 +31,8 @@ func FindNextAvailablePorts(s *State, cfg *config.PoolConfig, blockSize int) []i
 	}
 
 	var candidates []int
-	start := max(cfg.PortRangeStart, minPort)
-	end := min(cfg.PortRangeEnd, maxPort)
+	start := max(cfg.PortRangeStart, config.MinPort)
+	end := min(cfg.PortRangeEnd, config.MaxPort)
 	for base := start; base+blockSize-1 <= end; base++ {
 		ok := true
 		for i := 0; i < blockSize; i++ {
