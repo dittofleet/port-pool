@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"os"
 
+	clikit "github.com/dittofleet/go-cli-kit"
+	"github.com/dittofleet/go-cli-kit/selfupdate"
+	"github.com/dittofleet/go-cli-kit/updatecheck"
+	"github.com/dittofleet/port-pool/internal/app"
 	"github.com/dittofleet/port-pool/internal/cmd"
 	"github.com/dittofleet/port-pool/internal/config"
-	"github.com/dittofleet/port-pool/internal/update"
 )
 
 var errUnknownCommand = errors.New("unknown command")
@@ -39,7 +42,8 @@ func main() {
 		os.Exit(0)
 	}
 
-	if err := dispatch(args); err != nil {
+	portPool := app.New(version)
+	if err := dispatch(portPool, args); err != nil {
 		var missing *config.MissingPoolConfigError
 		switch {
 		case errors.Is(err, errUnknownCommand):
@@ -57,12 +61,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	if args[0] != "uninstall" {
-		update.MaybeCheck(version)
-	}
+	updatecheck.MaybeCheck(portPool, args[0])
 }
 
-func dispatch(args []string) error {
+func dispatch(portPool clikit.App, args []string) error {
 	switch args[0] {
 	case "provision":
 		return cmd.Provision(args[1:])
@@ -77,9 +79,10 @@ func dispatch(args []string) error {
 	case "setup-guide":
 		return cmd.SetupGuide(args[1:])
 	case "update":
-		return cmd.SelfUpdate(version)
+		_, err := selfupdate.Run(portPool)
+		return err
 	case "uninstall":
-		return cmd.Uninstall(args[1:], version)
+		return cmd.Uninstall(args[1:], portPool)
 	case "version", "--version", "-v":
 		fmt.Println(version)
 		return nil

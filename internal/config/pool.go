@@ -8,7 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/dittofleet/port-pool/internal/xdg"
+	"github.com/dittofleet/go-cli-kit/xdg"
+	"github.com/dittofleet/port-pool/internal/app"
 )
 
 const PoolSchemaVersion = 1
@@ -21,7 +22,7 @@ type PoolConfig struct {
 }
 
 func PoolConfigPath() string {
-	return filepath.Join(xdg.ConfigDir("port-pool"), "config.json")
+	return filepath.Join(xdg.ConfigDir(app.Name), "config.json")
 }
 
 // StarterPoolConfig returns the recommended starter content for a fresh

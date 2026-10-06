@@ -8,8 +8,9 @@ import (
 	"os"
 	"strings"
 
+	clikit "github.com/dittofleet/go-cli-kit"
+	"github.com/dittofleet/go-cli-kit/xdg"
 	"github.com/dittofleet/port-pool/internal/state"
-	"github.com/dittofleet/port-pool/internal/xdg"
 	"golang.org/x/term"
 )
 
@@ -18,28 +19,28 @@ const uninstallUsage = "usage: port-pool uninstall [--yes]"
 // Uninstall removes the port-pool binary, global config directory, and
 // data directory. Order is data → config → binary so a failure leaves a
 // tool to retry with.
-func Uninstall(args []string, version string) error {
+func Uninstall(args []string, a clikit.App) error {
 	args, yes := extractBoolFlag(args, "yes")
-	for _, a := range args {
-		if strings.HasPrefix(a, "--") {
-			return fmt.Errorf("unknown flag: %s\n%s", a, uninstallUsage)
+	for _, arg := range args {
+		if strings.HasPrefix(arg, "--") {
+			return fmt.Errorf("unknown flag: %s\n%s", arg, uninstallUsage)
 		}
 	}
 	if len(args) > 0 {
 		return fmt.Errorf("unexpected arguments: %v\n%s", args, uninstallUsage)
 	}
 
-	if version == "dev" {
+	if a.IsDev() {
 		return errors.New("cannot uninstall a dev build")
 	}
 
-	binaryPath, err := resolveExecutable()
+	binaryPath, err := clikit.Executable()
 	if err != nil {
 		return fmt.Errorf("cannot determine binary path: %w", err)
 	}
 
-	configDir := xdg.ConfigDir("port-pool")
-	dataDir := xdg.DataDir("port-pool")
+	configDir := xdg.ConfigDir(a.Name)
+	dataDir := xdg.DataDir(a.Name)
 
 	allocCount := -1
 	if s, err := state.Load(); err == nil {
@@ -101,4 +102,3 @@ func Uninstall(args []string, version string) error {
 	fmt.Println("Uninstalled port-pool.")
 	return nil
 }
-

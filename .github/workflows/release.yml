@@ -9,28 +9,4 @@ permissions:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-go@v5
-        with:
-          go-version: 'stable'
-      - name: Build all targets
-        run: |
-          mkdir -p dist
-          for combo in darwin-arm64 darwin-x64 linux-arm64 linux-x64; do
-            os=${combo%-*}
-            arch=${combo#*-}
-            goarch=$arch
-            [ "$arch" = "x64" ] && goarch=amd64
-            CGO_ENABLED=0 GOOS=$os GOARCH=$goarch \
-              go build -trimpath \
-                -ldflags="-s -w -X main.version=${{ github.ref_name }}" \
-                -o dist/port-pool-${combo} .
-          done
-      - env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release create "${GITHUB_REF_NAME}" \
-            --generate-notes \
-            dist/port-pool-*
+    uses: dittofleet/go-cli-kit/.github/workflows/go-release.yml@main
