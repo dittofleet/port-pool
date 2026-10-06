@@ -1,0 +1,11 @@
+# Opens a PR when go-cli-kit tags a new version, so fixes to the shared
+# update, self-update and XDG code reach this CLI. Other dependencies are
+# left to be bumped by hand.
+version: 2
+updates:
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: daily
+    allow:
+      - dependency-name: github.com/dittofleet/go-cli-kit
