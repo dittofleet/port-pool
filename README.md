@@ -44,7 +44,7 @@ Removes the binary, `~/.config/port-pool/` (global config and any per-pool confi
 
 ## Setup
 
-The install script creates a starter config at `~/.config/port-pool/config.json` with a default range of 3000–9999 and common dev-tool ports (databases, Vite, Django, etc.) excluded. Edit it to suit your machine — see [Configuration](#configuration).
+The install script creates a starter config at `~/.config/port-pool/config.json` that uses the default range of 3000 to 9999 and has common dev-tool ports (databases, Vite, Django, etc.) excluded. Edit it to suit your machine (see [Configuration](#configuration)).
 
 ## Usage
 
@@ -79,7 +79,7 @@ Wire `port-pool ensure .` directly into the project's dev script so a fresh clon
 }
 ```
 
-On the first `npm run dev` after cloning, ports are auto-provisioned and the configured env files are created. Subsequent runs are silent fast no-ops. If an env file has been hand-edited away from the templated values, `ensure` repairs it before the dev server starts.
+On the first `npm run dev` after cloning, ports are auto-provisioned and the configured env files are created. Subsequent runs are silent fast no-ops. If an env file has been hand-edited away from the templated values, `ensure` repairs it before the dev server starts. If the project holds a port below 1024, above 65535, or one that browsers block (see [Configuration](#configuration)), `ensure` replaces its ports with a new block.
 
 For CI or pre-commit checks, use `--check` to fail without modifying anything:
 
@@ -87,7 +87,7 @@ For CI or pre-commit checks, use `--check` to fail without modifying anything:
 port-pool ensure --check .
 ```
 
-`--check` exits with status 1 if the project is not provisioned or if any env file has drifted; otherwise it's silent.
+`--check` exits with status 1 if the project is not provisioned, holds a port below 1024, above 65535, or one that browsers block, or has an env file that drifted. Otherwise it's silent.
 
 Multiple parallel `ensure` calls (e.g. across worktrees starting their dev servers simultaneously) are safe; allocations serialize via a sidecar lock at `~/.local/share/port-pool/state.json.lock`.
 
@@ -116,8 +116,10 @@ Defines the machine-level port pool:
 ```
 
 - `schemaVersion`: required integer. Identifies the file's schema. The current schema is `1`. If a future port-pool release changes the schema, this number bumps and the binary errors clearly when it sees an old (or unknown) version.
-- `portRangeStart`/`portRangeEnd`: inclusive bounds of the pool.
+- `portRangeStart`/`portRangeEnd`: inclusive bounds of the pool. Optional. A missing bound defaults to 3000 (start) or 9999 (end). A range with no ports between 1024 and 65535 is rejected.
 - `excludedPorts`: ports inside the range that should never be allocated (typically defaults of common dev tools — Postgres, Redis, Vite, Django, Jupyter, etc.).
+
+Whatever the range, port-pool never hands out ports below 1024 or above 65535, or ports that browsers refuse to load (the Fetch standard's [bad ports](https://fetch.spec.whatwg.org/#port-blocking), such as 6000 and 6566). None of these need to be listed. Existing allocations that hold one are replaced by `ensure`.
 
 Respects `$XDG_CONFIG_HOME` if set.
 

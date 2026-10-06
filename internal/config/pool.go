@@ -14,6 +14,22 @@ import (
 
 const PoolSchemaVersion = 1
 
+// The pool range used when the config leaves portRangeStart or
+// portRangeEnd out.
+const (
+	DefaultPortRangeStart = 3000
+	DefaultPortRangeEnd   = 9999
+)
+
+// MinPort and MaxPort bound the ports port-pool hands out, whatever the
+// configured range. Ports below 1024 are well-known ports (and need root on
+// Linux), which a randomly provisioned dev server has no business taking.
+// 65535 is the highest TCP port.
+const (
+	MinPort = 1024
+	MaxPort = 65535
+)
+
 type PoolConfig struct {
 	SchemaVersion  int   `json:"schemaVersion"`
 	PortRangeStart int   `json:"portRangeStart"`
@@ -29,8 +45,6 @@ func PoolConfigPath() string {
 // install. main prints this when LoadPool returns a MissingPoolConfigError.
 const StarterPoolConfig = `{
   "schemaVersion": 1,
-  "portRangeStart": 3000,
-  "portRangeEnd": 9999,
   "excludedPorts": [
     3000, 3001, 3306,
     4000, 4200,
@@ -69,7 +83,10 @@ func LoadPool() (*PoolConfig, error) {
 		return nil, err
 	}
 
-	var cfg PoolConfig
+	cfg := PoolConfig{
+		PortRangeStart: DefaultPortRangeStart,
+		PortRangeEnd:   DefaultPortRangeEnd,
+	}
 	if err := json.Unmarshal(data, &cfg); err != nil {
 		return nil, fmt.Errorf("invalid %s: %w", path, err)
 	}
@@ -87,7 +104,16 @@ func (c *PoolConfig) validate(path string) error {
 		return fmt.Errorf("invalid %s:\n  - portRangeEnd: must be a positive integer", path)
 	}
 	if c.PortRangeEnd < c.PortRangeStart {
-		return fmt.Errorf("invalid %s:\n  - <root>: portRangeEnd must be >= portRangeStart", path)
+		return fmt.Errorf(
+			"invalid %s:\n  - <root>: portRangeEnd (%d) must be >= portRangeStart (%d)",
+			path, c.PortRangeEnd, c.PortRangeStart,
+		)
+	}
+	if c.PortRangeEnd < MinPort || c.PortRangeStart > MaxPort {
+		return fmt.Errorf(
+			"invalid %s:\n  - <root>: range %d-%d has no usable ports (port-pool only hands out %d-%d)",
+			path, c.PortRangeStart, c.PortRangeEnd, MinPort, MaxPort,
+		)
 	}
 	for i, p := range c.ExcludedPorts {
 		if p <= 0 {

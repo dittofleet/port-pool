@@ -53,9 +53,23 @@ func Ensure(args []string) error {
 
 	existing, _ := s.FindByDir(resolvedDir)
 
-	if existing == nil {
+	if existing != nil && !shapeMatches(existing, pcfg) {
+		fmt.Fprintf(os.Stderr,
+			"config shape changed; run 'port-pool release %s' then 'port-pool ensure %s'\n",
+			resolvedDir, resolvedDir,
+		)
+		return ErrCheckFailed
+	}
+
+	// Allocations holding a port port-pool no longer hands out (such as one
+	// browsers block, which a dev server can't be opened on) are replaced.
+	if existing == nil || existing.HasUnusablePort() {
 		if check {
-			fmt.Fprintf(os.Stderr, "not provisioned: %s\n", resolvedDir)
+			if existing == nil {
+				fmt.Fprintf(os.Stderr, "not provisioned: %s\n", resolvedDir)
+			} else {
+				fmt.Fprintf(os.Stderr, "unusable port: %s: %s\n", resolvedDir, existing.PortString())
+			}
 			return ErrCheckFailed
 		}
 		cfg, err := config.LoadPool()
@@ -63,8 +77,12 @@ func Ensure(args []string) error {
 			return err
 		}
 		return state.WithState(func(s *state.State) error {
-			if existing, _ := s.FindByDir(resolvedDir); existing != nil {
-				return nil
+			if existing, idx := s.FindByDir(resolvedDir); existing != nil {
+				if !existing.HasUnusablePort() {
+					return nil
+				}
+				fmt.Printf("Replacing unusable ports for %s: %s\n", resolvedDir, existing.PortString())
+				s.Allocations = append(s.Allocations[:idx], s.Allocations[idx+1:]...)
 			}
 			ports, err := PerformProvision(cfg, pcfg, s, resolvedDir)
 			if err != nil {
@@ -73,14 +91,6 @@ func Ensure(args []string) error {
 			fmt.Printf("Provisioned ports for %s: %s\n", resolvedDir, state.PortString(ports, pcfg.PortNames))
 			return nil
 		})
-	}
-
-	if !shapeMatches(existing, pcfg) {
-		fmt.Fprintf(os.Stderr,
-			"config shape changed; run 'port-pool release %s' then 'port-pool ensure %s'\n",
-			resolvedDir, resolvedDir,
-		)
-		return ErrCheckFailed
 	}
 
 	drifts, err := findDrift(resolvedDir, pcfg, existing.Ports)
