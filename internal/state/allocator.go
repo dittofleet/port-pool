@@ -7,8 +7,8 @@ import (
 )
 
 // FindNextAvailablePorts scans the configured pool range for a contiguous
-// block of `blockSize` ports not in use (excluded or allocated). Returns
-// nil if no such block exists.
+// block of `blockSize` ports not in use (excluded, allocated, or blocked by
+// browsers). Returns nil if no such block exists.
 //
 // Picks a *random* valid base port rather than the first-fit, on purpose:
 // processes outside port-pool's tracking (one-off scripts, system services
@@ -34,7 +34,9 @@ func FindNextAvailablePorts(s *State, cfg *config.PoolConfig, blockSize int) []i
 	for base := cfg.PortRangeStart; base+blockSize-1 <= cfg.PortRangeEnd; base++ {
 		ok := true
 		for i := 0; i < blockSize; i++ {
-			if _, taken := used[base+i]; taken {
+			_, taken := used[base+i]
+			_, blocked := browserBlockedPorts[base+i]
+			if taken || blocked {
 				ok = false
 				break
 			}

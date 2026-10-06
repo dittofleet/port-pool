@@ -27,7 +27,7 @@ func PerformProvision(
 
 	if portNumbers == nil {
 		lru := state.FindLeastRecentlyUsed(s, func(a *state.Allocation) bool {
-			return a.PortCount() == blockSize
+			return a.PortCount() == blockSize && !a.HasBrowserBlockedPort()
 		})
 		if lru == nil {
 			return nil, fmt.Errorf(
