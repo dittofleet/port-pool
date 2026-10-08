@@ -24,7 +24,7 @@ Supported platforms: macOS (arm64, x64), Linux (arm64, x64).
 
 ## Updating
 
-`port-pool` checks once per day for new releases and prints a hint to stderr when an update is available. Run `port-pool update` to upgrade in place.
+`port-pool` updates itself: at most once a day, after a command, it installs a newer release if one is out. Run `port-pool update` to do the same right away.
 
 The check is automatically skipped when:
 
