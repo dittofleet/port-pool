@@ -83,6 +83,8 @@ func dispatch(portPool clikit.App, args []string) error {
 		return err
 	case "uninstall":
 		return cmd.Uninstall(args[1:], portPool)
+	case "postinstall":
+		return cmd.Postinstall(portPool)
 	case "version", "--version", "-v":
 		fmt.Println(version)
 		return nil
