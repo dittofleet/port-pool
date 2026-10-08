@@ -11,13 +11,13 @@ Simple port allocation tool for testing multiple dev environments in parallel. U
 ## Install
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/dittofleet/port-pool/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/dittofleet/.github/main/install.sh | sh -s port-pool
 ```
 
-Installs the latest release to `~/.local/bin/port-pool`. Override the install location with `PORT_POOL_INSTALL_DIR`:
+Installs the latest release to `~/.local/bin/port-pool`, with a starter config listing ports to stay off. Override the install location with `PORT_POOL_INSTALL_DIR`:
 
 ```sh
-PORT_POOL_INSTALL_DIR=/usr/local/bin curl -fsSL https://raw.githubusercontent.com/dittofleet/port-pool/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/dittofleet/.github/main/install.sh | PORT_POOL_INSTALL_DIR=/usr/local/bin sh -s port-pool
 ```
 
 Supported platforms: macOS (arm64, x64), Linux (arm64, x64).
