@@ -1,6 +1,7 @@
 # Opens a PR when go-cli-kit tags a new version, so fixes to the shared
 # update, self-update and XDG code reach this CLI. Other dependencies are
-# left to be bumped by hand.
+# left to be bumped by hand. The kit is ours, so it skips Dependabot's
+# default 3-day wait before suggesting a new version.
 version: 2
 updates:
   - package-ecosystem: gomod
@@ -9,3 +10,6 @@ updates:
       interval: daily
     allow:
       - dependency-name: github.com/dittofleet/go-cli-kit
+    cooldown:
+      exclude:
+        - github.com/dittofleet/go-cli-kit
