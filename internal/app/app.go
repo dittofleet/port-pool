@@ -12,5 +12,5 @@ const Name = "port-pool"
 // New describes this build. The version is stamped into main at build
 // time, so main passes it in.
 func New(version string) clikit.App {
-	return clikit.App{Name: Name, Version: version}
+	return clikit.App{Owner: "dittofleet", Name: Name, Version: version}
 }
