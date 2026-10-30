@@ -3,7 +3,7 @@ module github.com/dittofleet/port-pool
 go 1.26.5
 
 require (
-	github.com/dittofleet/go-cli-kit v0.5.0
+	github.com/dittofleet/go-cli-kit v0.6.0
 	github.com/gofrs/flock v0.13.0
 )
 
