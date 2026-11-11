@@ -28,7 +28,7 @@ type State struct {
 // (nil, -1) if no such allocation exists.
 func (s *State) FindByDir(dir string) (*Allocation, int) {
 	for i := range s.Allocations {
-		if s.Allocations[i].Dir == dir {
+		if sameDir(s.Allocations[i].Dir, dir) {
 			return &s.Allocations[i], i
 		}
 	}

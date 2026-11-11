@@ -120,9 +120,8 @@ func (c *ProjectConfig) validate(path string) error {
 		}
 		if hasDotDot {
 			add(fmt.Sprintf("envFiles[%q]", envPath), "must not contain '..' segments")
-		}
-		if strings.HasPrefix(envPath, "/") {
-			add(fmt.Sprintf("envFiles[%q]", envPath), "must be a relative path")
+		} else if !filepath.IsLocal(envPath) {
+			add(fmt.Sprintf("envFiles[%q]", envPath), "must be a relative path inside the project")
 		}
 
 		env := c.EnvFiles[envPath]
