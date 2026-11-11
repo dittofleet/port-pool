@@ -20,7 +20,15 @@ Installs the latest release to `~/.local/bin/port-pool`, with a starter config l
 curl -fsSL https://raw.githubusercontent.com/dittofleet/.github/main/install.sh | PORT_POOL_INSTALL_DIR=/usr/local/bin sh -s port-pool
 ```
 
-Supported platforms: macOS (arm64, x64), Linux (arm64, x64).
+On Windows, in PowerShell:
+
+```powershell
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/dittofleet/.github/main/install.ps1))) port-pool
+```
+
+There, `~` in the paths below is your user profile folder.
+
+Supported platforms: macOS (arm64, x64), Linux (arm64, x64), Windows (x64).
 
 ## Updating
 
@@ -157,7 +165,7 @@ Path rules: env file paths are relative to the project root, may be in subdirect
 When provisioning:
 
 - **Keys not mentioned in `port-pool.config.json` are left untouched** — port-pool only manages the keys you list, so existing secrets and unrelated settings in the same file are safe.
-- Existing managed keys are updated in place; missing managed keys are appended.
+- Existing managed keys are updated in place; missing managed keys are appended. A file's line endings (LF or CRLF) are kept.
 - Files are created if they don't exist.
 
 ## State

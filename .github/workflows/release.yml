@@ -10,3 +10,5 @@ permissions:
 jobs:
   release:
     uses: dittofleet/go-cli-kit/.github/workflows/go-release.yml@main
+    with:
+      targets: darwin-arm64 darwin-x64 linux-arm64 linux-x64 windows-x64

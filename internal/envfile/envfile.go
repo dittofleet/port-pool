@@ -9,7 +9,8 @@ import (
 	"strings"
 )
 
-var kvLineRE = regexp.MustCompile(`(?m)^([A-Za-z_][A-Za-z0-9_]*)=(.*)$`)
+// The value stops short of any \r, so a CRLF file keeps its line endings.
+var kvLineRE = regexp.MustCompile(`(?m)^([A-Za-z_][A-Za-z0-9_]*)=([^\r\n]*)`)
 
 // Apply writes/updates each key in rendered into envPath. Existing keys are
 // updated in place; missing keys are appended. The file is created if it
@@ -38,11 +39,15 @@ func Apply(envPath string, rendered map[string]string) error {
 		}
 	}
 	sort.Strings(pending)
+	eol := "\n"
+	if strings.Contains(content, "\r\n") {
+		eol = "\r\n"
+	}
 	for _, key := range pending {
 		if len(content) > 0 && !strings.HasSuffix(content, "\n") {
-			content += "\n"
+			content += eol
 		}
-		content += key + "=" + rendered[key] + "\n"
+		content += key + "=" + rendered[key] + eol
 	}
 
 	return os.WriteFile(envPath, []byte(content), 0o644)
@@ -76,5 +81,7 @@ func readOrEmpty(path string) (string, error) {
 		}
 		return "", err
 	}
-	return string(data), nil
+	// Some Windows tools start UTF-8 files with a BOM, which would hide the
+	// first key.
+	return strings.TrimPrefix(string(data), "\xef\xbb\xbf"), nil
 }
