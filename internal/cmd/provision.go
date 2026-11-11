@@ -35,15 +35,16 @@ func PerformProvision(
 				blockSize,
 			)
 		}
-		fmt.Printf("Recycling ports from %s (least recently used)\n", lru.Dir)
+		recycled := *lru
+		fmt.Printf("Recycling ports from %s (least recently used)\n", recycled.Dir)
 		filtered := s.Allocations[:0]
 		for _, a := range s.Allocations {
-			if a.Dir != lru.Dir {
+			if a.Dir != recycled.Dir {
 				filtered = append(filtered, a)
 			}
 		}
 		s.Allocations = filtered
-		nums := lru.PortNumbers()
+		nums := recycled.PortNumbers()
 		sort.Ints(nums)
 		portNumbers = nums
 	}
